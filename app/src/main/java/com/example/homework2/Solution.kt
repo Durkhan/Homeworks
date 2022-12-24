@@ -52,7 +52,8 @@ Dispatchers.Main-starts in main Thread,perform the UI operations within the coro
         //launch 1000 coroutines.Invoke doWork(index/number of coroutine) in async way. Example 1, 2, 5, 3, 4, 8, etc.
 
         /*
-        Planning to do Complex and long-running calculations,
+
+       Dispatchers.Default ---> Planning to do Complex and long-running calculations,
         which can block the main thread
         It uses a shared background pool of threads
           */
