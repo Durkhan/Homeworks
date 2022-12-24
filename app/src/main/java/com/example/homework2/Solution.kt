@@ -53,7 +53,7 @@ Dispatchers.Main-starts in main Thread,perform the UI operations within the coro
 
         /*
         Planning to do Complex and long-running calculations,
-        which can block the main thread and freeze the UI.
+        which can block the main thread
         It uses a shared background pool of threads
           */
                 repeat(1000){
