@@ -3,10 +3,8 @@ package com.example.homework2
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 
 class Solution : AppCompatActivity() {
     private val state = MutableStateFlow("empty")
@@ -21,26 +19,23 @@ class Solution : AppCompatActivity() {
 //        runAsync()
 
         // subscribe to flow updates and print state.value to logcat.
-        lifecycleScope.launch {
-//          observe state updates
-            state.collect {
-                if (it != "empty")
-                    Log.d("Tag", it)
-            }
-        }
+        state.onEach {
+            if (it != "empty")
+                Log.d("Tag", it)
+        }.launchIn(GlobalScope)
+
     }
 
     private fun runSync() {
         println("runSync method.")
         //  launch 1000 coroutines, Invoke doWork(index/number of coroutine) one after another. Example 1, 2, 3, 4, 5, etc.
 
-/*
-Dispatchers.Main-starts in main Thread,perform the UI operations within the coroutine
- */
-                repeat(1000)
-                    {
-                    lifecycleScope.launch(Dispatchers.Main){
-                        doWork((it+1).toString())
+           GlobalScope.launch(Dispatchers.Main){
+                        repeat(1000) {
+                       async(Dispatchers.Default){
+                           doWork((it+1).toString())
+                        }.await()
+                            // await() will wait for the completion
                     }
 
                 }
@@ -53,16 +48,20 @@ Dispatchers.Main-starts in main Thread,perform the UI operations within the coro
 
         /*
 
-       Dispatchers.Default ---> Planning to do Complex and long-running calculations,
+      Dispatchers.Default ---> Planning to do Complex and long-running calculations,
         which can block the main thread
         It uses a shared background pool of threads
           */
-                repeat(1000){
-                      lifecycleScope.launch(Dispatchers.Default) {
-                          doWork((it+1).toString())
-                      }
-                  }
+            repeat(1000){
+                GlobalScope.async(Dispatchers.Default) {
+                    doWork((it+1).toString())
+                }
+
+            }
+
     }
+
+
     private suspend fun doWork(name: String) {
         delay(500)
         state.update { "$name completed." }
