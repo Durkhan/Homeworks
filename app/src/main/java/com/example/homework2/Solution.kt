@@ -15,52 +15,39 @@ class Solution : AppCompatActivity() {
     }
 
     private fun main() {
-        runSync()
-//        runAsync()
+//        runSync()
+        runAsync()
 
         // subscribe to flow updates and print state.value to logcat.
-        state.onEach {
-            if (it != "empty")
-                Log.d("Tag", it)
-        }.launchIn(GlobalScope)
+        runBlocking {
+            launch {
+                state.collect { Log.d("Tag", it) }
+            }
+        }
+
 
     }
 
-    private fun runSync() {
-        println("runSync method.")
+
         //  launch 1000 coroutines, Invoke doWork(index/number of coroutine) one after another. Example 1, 2, 3, 4, 5, etc.
 
-           GlobalScope.launch(Dispatchers.Main){
-                        repeat(1000) {
-                       async(Dispatchers.Default){
-                           doWork((it+1).toString())
-                        }.await()
-                            // await() will wait for the completion
-                    }
-
-                }
-
-    }
-
-    private fun runAsync() {
-        println("runAsync method.")
-        //launch 1000 coroutines.Invoke doWork(index/number of coroutine) in async way. Example 1, 2, 5, 3, 4, 8, etc.
-
-        /*
-
-      Dispatchers.Default ---> Planning to do Complex and long-running calculations,
-        which can block the main thread
-        It uses a shared background pool of threads
-          */
-            repeat(1000){
-                GlobalScope.async(Dispatchers.Default) {
-                    doWork((it+1).toString())
-                }
-
+        private fun runSync() = runBlocking {
+            println("runSync method.")
+            for (i in 1..1000) {
+                doWork("Coroutine $i")
             }
+        }
 
+
+    //  launch 1000 coroutines. Invoke doWork(index/number of coroutine) in async way. Example 1, 2, 5, 3, 4, 8, etc.
+    private fun runAsync() = runBlocking {
+        println("runAsync method.")
+        GlobalScope.launch {
+            for (i in 1..1000) {
+                launch { doWork("Coroutine $i") }
+            }
+        }
     }
-
 
     private suspend fun doWork(name: String) {
         delay(500)
